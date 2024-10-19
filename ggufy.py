@@ -104,7 +104,7 @@ def download_model(model_path, token):
     return cached_path, gguf_file
 
 def animated_loading():
-    chars = ['.', '.', '..', '..', '...', '...']
+    chars = ['    ', '.   ', '..  ', '... ']
     while True:
         for char in chars:
             sys.stdout.write('\r' + f"Generating {char}")
