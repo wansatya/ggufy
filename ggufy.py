@@ -2,15 +2,16 @@
 
 import argparse
 import requests
-import tempfile
 import os
 import sys
 import json
+import hashlib
 from llama_cpp import Llama
 from tqdm import tqdm
 
 CONFIG_DIR = os.path.expanduser("~/.config/ggufy")
 CONFIG_FILE = os.path.join(CONFIG_DIR, "config.json")
+CACHE_DIR = os.path.expanduser("~/.cache/ggufy")
 
 def save_token(token):
     os.makedirs(CONFIG_DIR, exist_ok=True)
@@ -59,6 +60,11 @@ def find_latest_gguf(username, repo, token):
     print(f"Latest GGUF file found: {latest_file}")
     return latest_file
 
+def get_cached_model_path(username, repo, gguf_file):
+    # Create a unique filename based on the model path
+    model_id = hashlib.md5(f"{username}/{repo}/{gguf_file}".encode()).hexdigest()
+    return os.path.join(CACHE_DIR, f"ggufy-{model_id}.gguf")
+
 def download_model(model_path, token):
     username, repo, file_name = parse_model_path(model_path)
     
@@ -66,6 +72,12 @@ def download_model(model_path, token):
         gguf_file = find_latest_gguf(username, repo, token)
     else:
         gguf_file = file_name
+    
+    cached_path = get_cached_model_path(username, repo, gguf_file)
+    
+    if os.path.exists(cached_path):
+        print(f"Using cached model: {cached_path}")
+        return cached_path, gguf_file
     
     model_url = f"https://huggingface.co/{username}/{repo}/resolve/main/{gguf_file}"
     
@@ -77,37 +89,41 @@ def download_model(model_path, token):
     
     total_size = int(response.headers.get('content-length', 0))
     
-    with tempfile.NamedTemporaryFile(delete=False, suffix='.gguf') as temp_file:
+    os.makedirs(CACHE_DIR, exist_ok=True)
+    with open(cached_path, 'wb') as file:
         progress_bar = tqdm(total=total_size, unit='iB', unit_scale=True)
         for chunk in response.iter_content(chunk_size=8192):
-            size = temp_file.write(chunk)
+            size = file.write(chunk)
             progress_bar.update(size)
         progress_bar.close()
     
-    print(f"Model downloaded successfully: {gguf_file}")
-    return temp_file.name, gguf_file
+    print(f"Model downloaded and cached: {cached_path}")
+    return cached_path, gguf_file
 
-def run_gguf_model(model_path, context, max_tokens, prompt, token):
+def run_gguf_model(model_path, context, max_tokens, token):
     try:
         print("Initializing GGUFY Runner...")
         model_file, gguf_file = download_model(model_path, token)
-        print(f"Model saved to: {model_file}")
+        print(f"Model file: {model_file}")
         
         print("Loading model into memory...")
         llm = Llama(model_path=model_file, n_ctx=context)
         print("Model loaded successfully.")
         
-        print(f"Generating text with prompt: '{prompt}'")
-        output = llm(prompt, max_tokens=max_tokens)
-        
-        print("\nGenerated text:")
-        print(output['choices'][0]['text'])
+        while True:
+            prompt = input("Enter your prompt (or 'quit' to exit): ").strip()
+            if prompt.lower() == 'quit':
+                break
+            
+            print(f"Generating text with prompt: '{prompt}'")
+            output = llm(prompt, max_tokens=max_tokens)
+            
+            print("\nGenerated text:")
+            print(output['choices'][0]['text'])
+            print("\n" + "-"*50 + "\n")
     
-    finally:
-        if 'model_file' in locals():
-            print("Cleaning up temporary files...")
-            os.remove(model_file)
-            print("Cleanup complete.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 def login():
     token = input("Enter your Hugging Face API token: ").strip()
@@ -125,7 +141,6 @@ def main():
     run_parser.add_argument("model_path", help="Model path in the format hf.co/username/repo or hf.co/username/repo:latest or hf.co/username/repo:specific_file.gguf")
     run_parser.add_argument("-c", "--context", type=int, default=4096, help="Context size for the model")
     run_parser.add_argument("-t", "--max-tokens", type=int, default=200, help="Maximum number of tokens to generate")
-    run_parser.add_argument("-p", "--prompt", default="Explain quantum computing", help="Prompt for text generation")
 
     args = parser.parse_args()
 
@@ -137,7 +152,7 @@ def main():
             print("No API token found. Please run 'ggufy login' first.")
             sys.exit(1)
         try:
-            run_gguf_model(args.model_path, args.context, args.max_tokens, args.prompt, token)
+            run_gguf_model(args.model_path, args.context, args.max_tokens, token)
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
