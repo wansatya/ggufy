@@ -2,7 +2,9 @@
 
 **GGUFy** is a tool that allows you to download and run GGUF (GPT-Generated Unified Format) models from the Hugging Face Hub using the **llama-cpp-python** library.
 
-## How it works
+<br/>
+
+## 1. How it works
 
 1. The setup script installs the latest release of **GGUFy** in a dedicated directory with its own virtual environment.
 
@@ -15,25 +17,18 @@
    - You can input multiple prompts interactively, and the script will generate text based on each prompt.
    - Cached models are kept for future use, reducing download times for subsequent runs.
 
+<br/>
 
-## Cache Management
-
-**GGUFy** caches downloaded models in the `~/.cache/ggufy` directory. This helps to avoid re-downloading models you've used before. 
-
-To manage the cache:
-
-1. To clear the cache and free up space, you can manually delete the files in the `~/.cache/ggufy` directory.
-2. If you want to force a re-download of a model, delete its corresponding file from the cache directory.
-
-
-## Prerequisites
+## 2. Prerequisites
 
 - Bash shell (Linux or macOS terminal, or Git Bash for Windows)
 - Python 3.7 or later
 - curl (for downloading the script)
 - Hugging Face account and API token
 
-## Setup
+<br/>
+
+## 3. Setup
 
 1. Create a Hugging Face account if you don't have one: [Hugging Face](https://huggingface.co/join)
 
@@ -51,18 +46,24 @@ To manage the cache:
 
 4. Restart your terminal or run:
    ```
-   source ~/.bashrc  # or ~/.zshrc if you're using Zsh
+   source ~/.bashrc
+   ```
+   or
+   ```
+   source ~/.zshrc
    ```
 
 5. Log in with your Hugging Face API token:
    ```
    ggufy login
    ```
-   You will be prompted to enter your API token. This token will be saved for future use.
+   *Note. You will be prompted to enter your API token. This token will be saved for future use.*
+
+<br/>
 
 The setup script will automatically download the latest release of **GGUFy**.
 
-## Usage
+## 4. Usage
 
 After setup and login, you can run **GGUFy** from anywhere using:
 
@@ -76,27 +77,29 @@ To see the help information, simply run:
 ggufy run -h
 ```
 
-### Commands
+### 4. 1. Commands
 
 - `login`: Save your Hugging Face API token
 - `run`: Run a GGUF model
 - `remove`: Uninstall **GGUFy** and remove all related files
 
-### Required Arguments for 'run' command
+### 4. 2. Required Arguments for 'run' command
 
 - `<model_path>`: Model path on Hugging Face Hub. Can be in one of these formats:
   - `hf.co/username/repo` (will use the latest GGUF file)
   - `hf.co/username/repo:latest` (explicitly use the latest GGUF file)
   - `hf.co/username/repo:specific_file.gguf` (use a specific GGUF file)
 
-Note: The repository name can include hyphens or other special characters.
+*Note: The repository name can include hyphens or other special characters.*
 
-### Optional Arguments for 'run' command
+### 4. 3. Optional Arguments for 'run' command
 
 - `-c`, `--context`: Context size for the model (default: 4096)
 - `-t`, `--max-tokens`: Maximum number of tokens to generate (default: 200)
+- `--cpu`: Force CPU usage even if GPU is available
+- `--stream`: Enable streaming output for real-time text generation
 
-### Examples
+### 4. 4. Examples
 
 Login:
 ```bash
@@ -106,16 +109,18 @@ ggufy login
 Run the latest GGUF file with short-form arguments (GPU is available):
 
 ```bash
-ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF -c 4096 -t 200
+ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF -c 4096 -t 200 
 ```
 
 Run a specific GGUF file with long-form arguments (CPU only):
 ```bash
-ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:mistral-7b-instruct-v0.1.Q4_K_M.gguf --context 4096 --max-tokens 200 --cpu
+ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:mistral-7b-instruct-v0.1.Q4_K_M.gguf --context 4096 --max-tokens 200 --cpu --stream
 ```
 After running one of these commands, you'll be prompted to enter your text prompts interactively.
 
-## Uninstalling **GGUFy**
+<br/>
+
+## 5. Uninstalling **GGUFy**
 
 To uninstall **GGUFy** and remove all related files, run:
 ```bash
@@ -130,13 +135,34 @@ This command will:
 
 After running this command, you may need to manually remove the `ggufy` command from your PATH if you added it during installation.
 
-## GPU Support
+<br/>
+
+## 6. Cache Management
+
+**GGUFy** caches downloaded models in the `~/.cache/ggufy` directory. This helps to avoid re-downloading models you've used before. 
+
+To manage the cache:
+
+1. To clear the cache and free up space, you can manually delete the files in the `~/.cache/ggufy` directory.
+2. If you want to force a re-download of a model, delete its corresponding file from the cache directory.
+
+<br/>
+
+## 7. GPU Support
 
 **GGUFy** automatically detects if GPU acceleration is available and uses it by default. If you want to force CPU usage, you can use the `--cpu` flag when running a model.
 
-Note: GPU support requires a CUDA-compatible GPU and the appropriate CUDA libraries installed on your system.
+*Note: GPU support requires a CUDA-compatible GPU and the appropriate CUDA libraries installed on your system.*
 
-## Troubleshooting
+<br/>
+
+## 8. Streaming Output
+
+By using the `--stream` flag, you can enable real-time streaming of the generated text. This allows you to see the text as it's being generated, rather than waiting for the entire output at once. This can be particularly useful for longer generations or when you want to see the model's thought process in real-time.
+
+<br/>
+
+## 9. Troubleshooting
 
 1. If `ggufy` command is not found, make sure you've restarted your terminal or sourced your shell configuration file after running the setup script.
 
@@ -156,15 +182,19 @@ Note: GPU support requires a CUDA-compatible GPU and the appropriate CUDA librar
 
 9. If you're having issues with a cached model, try deleting the corresponding file from the `~/.cache/ggufy` directory to force a re-download.
 
-## Contributing
+<br/>
+
+## 10. Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-## License
+<br/>
+
+## 11. License
 
 MIT License
 
-Copyright (c) 2024 **GGUFy**.
+Copyright (c) 2024 **GGUFy Foundation**.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal

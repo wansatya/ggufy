@@ -105,15 +105,17 @@ def download_model(model_path, token):
 
 def animated_loading():
     chars = ['    ', '.   ', '..  ', '... ']
-    while True:
+    while getattr(threading.current_thread(), "do_run", True):
         for char in chars:
             sys.stdout.write('\r' + f"Generating {char}")
             sys.stdout.flush()
-            time.sleep(0.1)
+            time.sleep(0.3)
+    sys.stdout.write('\r' + ' ' * 20 + '\r')
+    sys.stdout.flush()
 
-def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False):
+def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False, stream=False):
     try:
-        print("Initializing GGUFY...")
+        print("Initializing GGUFy...")
         model_file, gguf_file = download_model(model_path, token)
         print(f"Model file: {model_file}")
         
@@ -138,31 +140,34 @@ def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False):
             prompt = input("Any questions? (or 'quit' to exit): ").strip()
             if prompt.lower() == 'quit':
                 break
+            
+            if stream:
+                for chunk in llm(prompt, max_tokens=max_tokens, stream=True):
+                    print(chunk['choices'][0]['text'], end='', flush=True)
+                print("\n\n")
+            else:
+                # Start the loading animation
+                loading_thread = threading.Thread(target=animated_loading)
+                loading_thread.daemon = True
+                loading_thread.start()
+                
+                # Generate text
+                output = llm(prompt, max_tokens=max_tokens)
+                
+                # Stop the loading animation
+                loading_thread.do_run = False
+                loading_thread.join()
+                
+                print("\n")
+                print(output['choices'][0]['text'])
 
-            # Start the loading animation
-            loading_thread = threading.Thread(target=animated_loading)
-            loading_thread.daemon = True
-            loading_thread.start()
-            
-            output = llm(prompt, max_tokens=max_tokens)
-
-            # Stop the loading animation
-            loading_thread.do_run = False
-            loading_thread.join()
-            
-            # Clear the loading animation line
-            sys.stdout.write('\r' + ' ' * 20 + '\r')
-            sys.stdout.flush()
-            
-            print("\n")
-            print(output['choices'][0]['text'])
             print("\n" + "-"*50 + "\n")
     
     except Exception as e:
         print(f"An error occurred: {e}")
 
 def remove_ggufy():
-    print("Removing GGUFY and all related files...")
+    print("Removing GGUFy and all related files...")
     
     # Remove configuration directory
     if os.path.exists(CONFIG_DIR):
@@ -177,9 +182,9 @@ def remove_ggufy():
     # Remove the script itself
     script_path = os.path.abspath(__file__)
     os.remove(script_path)
-    print(f"Removed GGUFY script: {script_path}")
+    print(f"Removed GGUFy script: {script_path}")
     
-    print("GGUFY has been successfully uninstalled.")
+    print("GGUFy has been successfully uninstalled.")
     print("Note: You may need to manually remove the 'ggufy' command from your PATH.")
 
 def login():
@@ -199,9 +204,10 @@ def main():
     run_parser.add_argument("-c", "--context", type=int, default=4096, help="Context size for the model")
     run_parser.add_argument("-t", "--max-tokens", type=int, default=200, help="Maximum number of tokens to generate")
     run_parser.add_argument("--cpu", action="store_true", help="Force CPU usage even if GPU is available")
+    run_parser.add_argument("--stream", action="store_true", help="Enable streaming output")
 
     # Remove command
-    remove_parser = subparsers.add_parser("remove", help="Uninstall GGUFY and remove all related files")
+    remove_parser = subparsers.add_parser("remove", help="Uninstall GGUFy and remove all related files")
 
     args = parser.parse_args()
 
@@ -213,12 +219,12 @@ def main():
             print("No API token found. Please run 'ggufy login' first.")
             sys.exit(1)
         try:
-            run_gguf_model(args.model_path, args.context, args.max_tokens, token, force_cpu=args.cpu)
+            run_gguf_model(args.model_path, args.context, args.max_tokens, token, force_cpu=args.cpu, stream=args.stream)
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
     elif args.command == "remove":
-        confirm = input("Are you sure you want to uninstall GGUFY and remove all related files? (y/N): ").lower()
+        confirm = input("Are you sure you want to uninstall GGUFy and remove all related files? (y/N): ").lower()
         if confirm == 'y':
             remove_ggufy()
         else:
