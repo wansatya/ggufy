@@ -7,6 +7,8 @@ import sys
 import json
 import hashlib
 import shutil
+import time
+import threading
 from llama_cpp import Llama
 from tqdm import tqdm
 
@@ -101,6 +103,14 @@ def download_model(model_path, token):
     print(f"Model downloaded and cached: {cached_path}")
     return cached_path, gguf_file
 
+def animated_loading():
+    chars = ['-', '/', '|', '\\']
+    while True:
+        for char in chars:
+            sys.stdout.write('\r' + f"Generating {char}")
+            sys.stdout.flush()
+            time.sleep(0.1)
+
 def run_gguf_model(model_path, context, max_tokens, token):
     try:
         print("Initializing GGUFY...")
@@ -115,10 +125,23 @@ def run_gguf_model(model_path, context, max_tokens, token):
             prompt = input("Any questions? (or 'quit' to exit): ").strip()
             if prompt.lower() == 'quit':
                 break
+
+            # Start the loading animation
+            loading_thread = threading.Thread(target=animated_loading)
+            loading_thread.daemon = True
+            loading_thread.start()
             
             output = llm(prompt, max_tokens=max_tokens)
+
+            # Stop the loading animation
+            loading_thread.do_run = False
+            loading_thread.join()
             
-            print("\nGgufy:")
+            # Clear the loading animation line
+            sys.stdout.write('\r' + ' ' * 20 + '\r')
+            sys.stdout.flush()
+            
+            print("\n")
             print(output['choices'][0]['text'])
             print("\n" + "-"*50 + "\n")
     
