@@ -20,7 +20,7 @@ def save_token(token):
     os.makedirs(CONFIG_DIR, exist_ok=True)
     with open(CONFIG_FILE, "w") as f:
         json.dump({"token": token}, f)
-    print("Token saved successfully.")
+    print("Token saved successfully.\n")
 
 def load_token():
     try:
@@ -49,7 +49,7 @@ def parse_model_path(model_path):
     return username, repo, file_name
 
 def find_latest_gguf(username, repo, token):
-    print(f"Searching for GGUF files in {username}/{repo}...")
+    print(f"Searching for GGUF files in {username}/{repo}...\n")
     api_url = f"https://huggingface.co/api/models/{username}/{repo}"
     response = requests.get(api_url, headers=get_headers(token))
     response.raise_for_status()
@@ -60,7 +60,7 @@ def find_latest_gguf(username, repo, token):
         raise ValueError(f"No GGUF file found in {username}/{repo}")
     
     latest_file = max(gguf_files)
-    print(f"Latest GGUF file found: {latest_file}")
+    print(f"Latest GGUF file found: {latest_file}\n")
     return latest_file
 
 def get_cached_model_path(username, repo, gguf_file):
@@ -79,12 +79,12 @@ def download_model(model_path, token):
     cached_path = get_cached_model_path(username, repo, gguf_file)
     
     if os.path.exists(cached_path):
-        print(f"Using cached model: {cached_path}")
+        print(f"Using cached model: {cached_path}\n")
         return cached_path, gguf_file
     
     model_url = f"https://huggingface.co/{username}/{repo}/resolve/main/{gguf_file}"
     
-    print(f"Downloading model: {gguf_file}")
+    print(f"Downloading model: {gguf_file}\n")
     response = requests.get(model_url, stream=True, headers=get_headers(token))
     if response.status_code == 404:
         raise ValueError(f"GGUF file '{gguf_file}' not found in {username}/{repo}")
@@ -100,7 +100,7 @@ def download_model(model_path, token):
             progress_bar.update(size)
         progress_bar.close()
     
-    print(f"Model downloaded and cached: {cached_path}")
+    print(f"Model downloaded and cached: {cached_path}\n")
     return cached_path, gguf_file
 
 def animated_loading():
@@ -109,17 +109,17 @@ def animated_loading():
         for char in chars:
             sys.stdout.write('\r' + f"Generating {char}")
             sys.stdout.flush()
-            time.sleep(0.3)
+            time.sleep(0.8)
     sys.stdout.write('\r' + ' ' * 20 + '\r')
     sys.stdout.flush()
 
 def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False, stream=False):
     try:
-        print("Initializing GGUFy...")
+        print("\nInitializing GGUFy...\n")
         model_file, gguf_file = download_model(model_path, token)
-        print(f"Model file: {model_file}")
+        print(f"Model file: {model_file}\n")
         
-        print("Loading model into memory...")
+        print("Loading model into memory...\n")
 
         # Check for GPU availability
         gpu_layers = 0
@@ -127,14 +127,14 @@ def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False, stre
             try:
                 from llama_cpp import llama_cpp
                 gpu_layers = llama_cpp.llama_n_gpu_layers
-                print(f"GPU acceleration is available. Using {gpu_layers} GPU layers.")
+                print(f"GPU acceleration is available. Using {gpu_layers} GPU layers.\n")
             except AttributeError:
-                print("GPU acceleration is not available. Using CPU.")
+                print("GPU acceleration is not available. Using CPU.\n")
         else:
-            print("Forced CPU usage. GPU will not be used even if available.")
+            print("Forced CPU usage. GPU will not be used even if available.\n")
 
         llm = Llama(model_path=model_file, n_ctx=context, n_gpu_layers=gpu_layers)
-        print("Model loaded successfully.")
+        print("\nModel loaded successfully.\n")
         
         while True:
             prompt = input("Any questions? (or 'quit' to exit): ").strip()
@@ -144,7 +144,7 @@ def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False, stre
             if stream:
                 for chunk in llm(prompt, max_tokens=max_tokens, stream=True):
                     print(chunk['choices'][0]['text'], end='', flush=True)
-                print("\n\n")
+                print("\n")
             else:
                 # Start the loading animation
                 loading_thread = threading.Thread(target=animated_loading)
@@ -167,7 +167,7 @@ def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False, stre
         print(f"An error occurred: {e}")
 
 def remove_ggufy():
-    print("Removing GGUFy and all related files...")
+    print("Removing GGUFy and all related files...\n")
     
     # Remove configuration directory
     if os.path.exists(CONFIG_DIR):
@@ -177,15 +177,15 @@ def remove_ggufy():
     # Remove cache directory
     if os.path.exists(CACHE_DIR):
         shutil.rmtree(CACHE_DIR)
-        print(f"Removed cache directory: {CACHE_DIR}")
+        print(f"Removed cache directory: {CACHE_DIR}\n")
     
     # Remove the script itself
     script_path = os.path.abspath(__file__)
     os.remove(script_path)
-    print(f"Removed GGUFy script: {script_path}")
+    print(f"Removed GGUFy script: {script_path}\n")
     
     print("GGUFy has been successfully uninstalled.")
-    print("Note: You may need to manually remove the 'ggufy' command from your PATH.")
+    print("Note: You may need to manually remove the 'ggufy' command from your PATH.\n")
 
 def login():
     token = input("Enter your Hugging Face API token: ").strip()
@@ -216,7 +216,7 @@ def main():
     elif args.command == "run":
         token = load_token()
         if not token:
-            print("No API token found. Please run 'ggufy login' first.")
+            print("No API token found. Please run 'ggufy login' first.\n")
             sys.exit(1)
         try:
             run_gguf_model(args.model_path, args.context, args.max_tokens, token, force_cpu=args.cpu, stream=args.stream)
@@ -228,7 +228,7 @@ def main():
         if confirm == 'y':
             remove_ggufy()
         else:
-            print("Uninstall cancelled.")
+            print("Uninstall cancelled.\n")
     else:
         parser.print_help()
         sys.exit(1)
