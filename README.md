@@ -22,7 +22,7 @@ GGUFY is a tool that allows you to download and run GGUF (GPT-Generated Unified 
 
 3. Download and run the setup script:
    ```
-   curl -sSL https://raw.githubusercontent.com/yourusername/ggufy/main/setup.sh | bash
+   curl -sSL https://raw.githubusercontent.com/wansatya/ggufy/main/setup.sh | bash
    ```
 
 4. Restart your terminal or run:
