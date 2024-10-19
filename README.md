@@ -7,38 +7,66 @@ GGUFY is a tool that allows you to download and run GGUF (GPT-Generated Unified 
 - Bash shell (Linux or macOS terminal, or Git Bash for Windows)
 - Python 3.7 or later
 - curl (for downloading the script)
+- Hugging Face account and API token
 
 ## Setup
 
-1. Download and run the setup script:
+1. Create a Hugging Face account if you don't have one: [Hugging Face](https://huggingface.co/join)
+
+2. Generate an API token:
+   - Go to your [Hugging Face account settings](https://huggingface.co/settings/tokens)
+   - Click on "New token"
+   - Give it a name (e.g., "GGUFY Runner")
+   - Select the appropriate permissions (read access is sufficient)
+   - Copy the generated token
+
+3. Download and run the setup script:
    ```
-   curl -sSL https://raw.githubusercontent.com/wansatya/ggufy/main/setup.sh | bash
+   curl -sSL https://raw.githubusercontent.com/yourusername/ggufy/main/setup.sh | bash
    ```
 
-2. Restart your terminal or run:
+4. Restart your terminal or run:
    ```
    source ~/.bashrc  # or ~/.zshrc if you're using Zsh
    ```
+
+5. Log in with your Hugging Face API token:
+   ```
+   ggufy login
+   ```
+   You will be prompted to enter your API token. This token will be saved for future use.
 
 The setup script will automatically download the latest release of GGUFY.
 
 ## Usage
 
-After setup, you can run GGUFY from anywhere using:
+After setup and login, you can run GGUFY from anywhere using:
 
 ```
 ggufy run <model_path> [options]
 ```
 
-### Required Arguments
+To see the help information, simply run:
 
-- `run`: The command to execute
+```
+ggufy
+```
+
+### Commands
+
+- `login`: Save your Hugging Face API token
+- `run`: Run a GGUF model
+
+### Required Arguments for 'run' command
+
 - `<model_path>`: Model path on Hugging Face Hub. Can be in one of these formats:
   - `hf.co/username/repo` (will use the latest GGUF file)
   - `hf.co/username/repo:latest` (explicitly use the latest GGUF file)
   - `hf.co/username/repo:specific_file.gguf` (use a specific GGUF file)
 
-### Optional Arguments
+Note: The repository name can include hyphens or other special characters.
+
+### Optional Arguments for 'run' command
 
 - `-c`, `--context`: Context size for the model (default: 4096)
 - `-t`, `--max-tokens`: Maximum number of tokens to generate (default: 200)
@@ -46,60 +74,30 @@ ggufy run <model_path> [options]
 
 ### Examples
 
-Using the latest GGUF file with short-form arguments:
-```bash
+Login:
+```
+ggufy login
+```
+
+Run the latest GGUF file with short-form arguments:
+```
 ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF -c 4096 -t 200 -p "Explain quantum computing"
 ```
 
-Using a specific GGUF file with long-form arguments:
-```bash
+Run a specific GGUF file with long-form arguments:
+```
 ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:mistral-7b-instruct-v0.1.Q4_K_M.gguf --context 4096 --max-tokens 200 --prompt "Explain quantum computing"
 ```
 
-Using a repository with a hyphenated name:
-```bash
-ggufy run hf.co/meta-llama/Llama-2-7b-chat-hf -c 4096 -t 200 -p "Explain quantum computing"
-```
-
-### Help
-
-To see all available options and their descriptions, run:
-
-```bash
-ggufy run --help
-```
-
-## Updating GGUFY
-
-To update GGUFY to the latest version, simply run the setup script again:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/yourusername/ggufy/main/setup.sh | bash
-```
-
-## How it works
-
-1. The setup script installs the latest release of GGUFY in a dedicated directory with its own virtual environment.
-2. When running a model:
-   - If no specific file is provided, the script finds the latest GGUF file from the specified Hugging Face repository.
-   - The model is downloaded and saved to a temporary file.
-   - The model is loaded using the llama-cpp-python library.
-   - Text is generated based on the provided prompt and parameters.
-   - After execution, the temporary model file is automatically deleted.
+[Rest of the README remains the same]
 
 ## Troubleshooting
 
-1. If `ggufy` command is not found, make sure you've restarted your terminal or sourced your shell configuration file after running the setup script.
+[Add this to the existing Troubleshooting section]
 
-2. For any issues, try running the setup script again. It will reinstall the latest version of GGUFY and its dependencies.
+8. If you encounter authentication issues, make sure you've run `ggufy login` and entered a valid Hugging Face API token. You can generate a new token in your Hugging Face account settings and run `ggufy login` again to update it.
 
-3. Make sure you have an active internet connection for downloading models and updates.
-
-4. If you encounter any Python-related errors, ensure you're using Python 3.7 or later.
-
-5. If no GGUF file is found in the specified repository, or if the specified file doesn't exist, the script will raise an error.
-
-6. If you're having trouble with arguments, make sure you're using the correct format: `-c` for context, `-t` for max tokens, and `-p` for prompt.
+[Rest of the README remains the same]
 
 ## Contributing
 
