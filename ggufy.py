@@ -111,14 +111,27 @@ def animated_loading():
             sys.stdout.flush()
             time.sleep(0.1)
 
-def run_gguf_model(model_path, context, max_tokens, token):
+def run_gguf_model(model_path, context, max_tokens, token, force_cpu=False):
     try:
         print("Initializing GGUFY...")
         model_file, gguf_file = download_model(model_path, token)
         print(f"Model file: {model_file}")
         
         print("Loading model into memory...")
-        llm = Llama(model_path=model_file, n_ctx=context)
+
+        # Check for GPU availability
+        gpu_layers = 0
+        if not force_cpu:
+            try:
+                from llama_cpp import llama_cpp
+                gpu_layers = llama_cpp.llama_n_gpu_layers
+                print(f"GPU acceleration is available. Using {gpu_layers} GPU layers.")
+            except AttributeError:
+                print("GPU acceleration is not available. Using CPU.")
+        else:
+            print("Forced CPU usage. GPU will not be used even if available.")
+
+        llm = Llama(model_path=model_file, n_ctx=context, n_gpu_layers=gpu_layers)
         print("Model loaded successfully.")
         
         while True:
@@ -185,6 +198,7 @@ def main():
     run_parser.add_argument("model_path", help="Model path in the format hf.co/username/repo or hf.co/username/repo:latest or hf.co/username/repo:specific_file.gguf")
     run_parser.add_argument("-c", "--context", type=int, default=4096, help="Context size for the model")
     run_parser.add_argument("-t", "--max-tokens", type=int, default=200, help="Maximum number of tokens to generate")
+    run_parser.add_argument("--cpu", action="store_true", help="Force CPU usage even if GPU is available")
 
     # Remove command
     remove_parser = subparsers.add_parser("remove", help="Uninstall GGUFY and remove all related files")
@@ -199,7 +213,7 @@ def main():
             print("No API token found. Please run 'ggufy login' first.")
             sys.exit(1)
         try:
-            run_gguf_model(args.model_path, args.context, args.max_tokens, token)
+            run_gguf_model(args.model_path, args.context, args.max_tokens, token, force_cpu=args.cpu)
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
