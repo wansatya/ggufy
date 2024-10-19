@@ -51,6 +51,7 @@ fi
 echo "export PATH=\$PATH:$INSTALL_DIR" >> "$SHELL_RC"
 
 echo "Installation complete. Please restart your terminal or run 'source $SHELL_RC' to use ggufy command."
-echo "------------------------------------"
+echo "--------------------------------"
 echo "Start using ggufy: 'ggufy login' "
 echo "You can now run 'ggufy run hf.co/username/repository [options]' from anywhere."
+echo "--------------------------------"

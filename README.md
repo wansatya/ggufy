@@ -1,6 +1,30 @@
 # GGUFY - GGUF Models Runner
 
-GGUFY is a tool that allows you to download and run GGUF (GPT-Generated Unified Format) models from the Hugging Face Hub using the llama-cpp-python library.
+GGUFY is a tool that allows you to download and run GGUF (GPT-Generated Unified Format) models from the Hugging Face Hub using the **llama-cpp-python** library.
+
+## How it works
+
+1. The setup script installs the latest release of GGUFY in a dedicated directory with its own virtual environment.
+
+2. When running a model:
+
+   - The script checks if the requested model is already cached in the `~/.cache/ggufy` directory.
+   - If the model is cached, it uses the existing file.
+   - If not, it downloads the model from the Hugging Face Hub and saves it to the cache directory.
+   - The model is loaded into memory using the llama-cpp-python library.
+   - You can input multiple prompts interactively, and the script will generate text based on each prompt.
+   - Cached models are kept for future use, reducing download times for subsequent runs.
+
+
+## Cache Management
+
+GGUFY caches downloaded models in the `~/.cache/ggufy` directory. This helps to avoid re-downloading models you've used before. 
+
+To manage the cache:
+
+1. To clear the cache and free up space, you can manually delete the files in the `~/.cache/ggufy` directory.
+2. If you want to force a re-download of a model, delete its corresponding file from the cache directory.
+
 
 ## Prerequisites
 
@@ -42,20 +66,21 @@ The setup script will automatically download the latest release of GGUFY.
 
 After setup and login, you can run GGUFY from anywhere using:
 
-```
+```bash
 ggufy run <model_path> [options]
 ```
 
 To see the help information, simply run:
 
-```
-ggufy
+```bash
+ggufy run -h
 ```
 
 ### Commands
 
 - `login`: Save your Hugging Face API token
 - `run`: Run a GGUF model
+- `remove`: Uninstall GGUFY and remove all related files
 
 ### Required Arguments for 'run' command
 
@@ -75,29 +100,55 @@ Note: The repository name can include hyphens or other special characters.
 ### Examples
 
 Login:
-```
+```bash
 ggufy login
 ```
 
 Run the latest GGUF file with short-form arguments:
-```
-ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF -c 4096 -t 200 -p "Explain quantum computing"
+```bash
+ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF -c 4096 -t 200
 ```
 
 Run a specific GGUF file with long-form arguments:
+```bash
+ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:mistral-7b-instruct-v0.1.Q4_K_M.gguf --context 4096 --max-tokens 200
 ```
-ggufy run hf.co/TheBloke/Mistral-7B-Instruct-v0.1-GGUF:mistral-7b-instruct-v0.1.Q4_K_M.gguf --context 4096 --max-tokens 200 --prompt "Explain quantum computing"
+After running one of these commands, you'll be prompted to enter your text prompts interactively.
+
+## Uninstalling GGUFY
+
+To uninstall GGUFY and remove all related files, run:
+```bash
+ggufy remove
 ```
 
-[Rest of the README remains the same]
+This command will:
+
+- Remove the configuration directory (`~/.config/ggufy`)
+- Remove the cache directory (`~/.cache/ggufy`)
+- Delete the GGUFY script itself
+
+After running this command, you may need to manually remove the `ggufy` command from your PATH if you added it during installation.
 
 ## Troubleshooting
 
-[Add this to the existing Troubleshooting section]
+1. If `ggufy` command is not found, make sure you've restarted your terminal or sourced your shell configuration file after running the setup script.
+
+2. For any issues, try running the setup script again. It will reinstall the latest version of GGUFY and its dependencies.
+
+3. Make sure you have an active internet connection for downloading models and updates.
+
+4. If you encounter any Python-related errors, ensure you're using Python 3.7 or later.
+
+5. If no GGUF file is found in the specified repository, or if the specified file doesn't exist, the script will raise an error.
+
+6. If you're having trouble with arguments, make sure you're using the correct format: `-c` for context and `-t` for max tokens.
+
+7. If you're using a repository with a hyphenated name or other special characters, make sure to include the full repository name as it appears on Hugging Face.
 
 8. If you encounter authentication issues, make sure you've run `ggufy login` and entered a valid Hugging Face API token. You can generate a new token in your Hugging Face account settings and run `ggufy login` again to update it.
 
-[Rest of the README remains the same]
+9. If you're having issues with a cached model, try deleting the corresponding file from the `~/.cache/ggufy` directory to force a re-download.
 
 ## Contributing
 

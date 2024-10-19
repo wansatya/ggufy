@@ -6,6 +6,7 @@ import os
 import sys
 import json
 import hashlib
+import shutil
 from llama_cpp import Llama
 from tqdm import tqdm
 
@@ -102,7 +103,7 @@ def download_model(model_path, token):
 
 def run_gguf_model(model_path, context, max_tokens, token):
     try:
-        print("Initializing GGUFY Runner...")
+        print("Initializing GGUFY...")
         model_file, gguf_file = download_model(model_path, token)
         print(f"Model file: {model_file}")
         
@@ -111,19 +112,39 @@ def run_gguf_model(model_path, context, max_tokens, token):
         print("Model loaded successfully.")
         
         while True:
-            prompt = input("Enter your prompt (or 'quit' to exit): ").strip()
+            prompt = input("Any questions? (or 'quit' to exit): ").strip()
             if prompt.lower() == 'quit':
                 break
             
-            print(f"Generating text with prompt: '{prompt}'")
             output = llm(prompt, max_tokens=max_tokens)
             
-            print("\nGenerated text:")
+            print("\nGgufy:")
             print(output['choices'][0]['text'])
             print("\n" + "-"*50 + "\n")
     
     except Exception as e:
         print(f"An error occurred: {e}")
+
+def remove_ggufy():
+    print("Removing GGUFY and all related files...")
+    
+    # Remove configuration directory
+    if os.path.exists(CONFIG_DIR):
+        shutil.rmtree(CONFIG_DIR)
+        print(f"Removed configuration directory: {CONFIG_DIR}")
+    
+    # Remove cache directory
+    if os.path.exists(CACHE_DIR):
+        shutil.rmtree(CACHE_DIR)
+        print(f"Removed cache directory: {CACHE_DIR}")
+    
+    # Remove the script itself
+    script_path = os.path.abspath(__file__)
+    os.remove(script_path)
+    print(f"Removed GGUFY script: {script_path}")
+    
+    print("GGUFY has been successfully uninstalled.")
+    print("Note: You may need to manually remove the 'ggufy' command from your PATH.")
 
 def login():
     token = input("Enter your Hugging Face API token: ").strip()
@@ -142,6 +163,9 @@ def main():
     run_parser.add_argument("-c", "--context", type=int, default=4096, help="Context size for the model")
     run_parser.add_argument("-t", "--max-tokens", type=int, default=200, help="Maximum number of tokens to generate")
 
+    # Remove command
+    remove_parser = subparsers.add_parser("remove", help="Uninstall GGUFY and remove all related files")
+
     args = parser.parse_args()
 
     if args.command == "login":
@@ -156,6 +180,12 @@ def main():
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
+    elif args.command == "remove":
+        confirm = input("Are you sure you want to uninstall GGUFY and remove all related files? (y/N): ").lower()
+        if confirm == 'y':
+            remove_ggufy()
+        else:
+            print("Uninstall cancelled.")
     else:
         parser.print_help()
         sys.exit(1)
