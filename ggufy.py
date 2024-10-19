@@ -39,8 +39,8 @@ def parse_model_path(model_path):
     if len(repo_parts) < 3 or repo_parts[0] != 'hf.co':
         raise ValueError(f"Invalid repository path: {repo_path}. Expected format: hf.co/username/repo")
     
-    username = repo_parts[2]
-    repo = '/'.join(repo_parts[3:])
+    username = repo_parts[1]
+    repo = '/'.join(repo_parts[2:])
     return username, repo, file_name
 
 def find_latest_gguf(username, repo, token):
