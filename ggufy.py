@@ -63,11 +63,6 @@ def find_latest_gguf(username, repo, token):
     print(f"Latest GGUF file found: {latest_file}\n")
     return latest_file
 
-def get_cached_model_path(username, repo, gguf_file):
-    # Create a unique filename based on the model path
-    model_id = hashlib.md5(f"{username}/{repo}/{gguf_file}".encode()).hexdigest()
-    return os.path.join(CACHE_DIR, f"ggufy-{model_id}.gguf")
-
 def download_model(model_path, token):
     username, repo, file_name = parse_model_path(model_path)
     
@@ -190,6 +185,49 @@ def remove_ggufy():
 def login():
     token = input("Enter your Hugging Face API token: ").strip()
     save_token(token)
+    
+def list_cached_models():
+    if not os.path.exists(CACHE_DIR):
+        print("No cached models found.")
+        return
+
+    cached_files = os.listdir(CACHE_DIR)
+    if not cached_files:
+        print("No cached models found.")
+        return
+
+    print("Cached models:")
+    for filename in cached_files:
+        if filename.startswith("ggufy-") and filename.endswith(".gguf"):
+            model_id = filename[6:-5]  # Remove "ggufy-" prefix and ".gguf" suffix
+            try:
+                with open(os.path.join(CACHE_DIR, f"{filename}.json"), "r") as f:
+                    metadata = json.load(f)
+                    repo_name = metadata.get("repo_name", "Unknown")
+                    file_name = metadata.get("file_name", "Unknown")
+                    print(f"- {repo_name}: {file_name}")
+            except FileNotFoundError:
+                print(f"- Unknown: {filename}")
+                
+def get_cached_model_path(username, repo, gguf_file):
+    # Create a unique filename based on the model path
+    model_id = hashlib.md5(f"{username}/{repo}/{gguf_file}".encode()).hexdigest()
+    cached_path = os.path.join(CACHE_DIR, f"ggufy-{model_id}.gguf")
+    
+    # Save metadata
+    metadata = {
+        "repo_name": f"{username}/{repo}",
+        "file_name": gguf_file
+    }
+    with open(f"{cached_path}.json", "w") as f:
+        json.dump(metadata, f)
+    
+    return cached_path
+
+""" def get_cached_model_path(username, repo, gguf_file):
+    # Create a unique filename based on the model path
+    model_id = hashlib.md5(f"{username}/{repo}/{gguf_file}".encode()).hexdigest()
+    return os.path.join(CACHE_DIR, f"ggufy-{model_id}.gguf") """
 
 def main():
     parser = argparse.ArgumentParser(description="Run GGUF models from Hugging Face Hub")
@@ -206,6 +244,9 @@ def main():
     run_parser.add_argument("--cpu", action="store_true", help="Force CPU usage even if GPU is available")
     run_parser.add_argument("--stream", action="store_true", help="Enable streaming output")
 
+    # List command
+    list_parser = subparsers.add_parser("list", help="List cached models")
+    
     # Remove command
     remove_parser = subparsers.add_parser("remove", help="Uninstall GGUFy and remove all related files")
 
@@ -223,6 +264,8 @@ def main():
         except Exception as e:
             print(f"Error: {e}")
             sys.exit(1)
+    elif args.command == "list":
+        list_cached_models()
     elif args.command == "remove":
         confirm = input("Are you sure you want to uninstall GGUFy and remove all related files? (y/N): ").lower()
         if confirm == 'y':

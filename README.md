@@ -63,6 +63,8 @@
 
 The setup script will automatically download the latest release of **GGUFy**.
 
+<br/>
+
 ## 4. Usage
 
 After setup and login, you can run **GGUFy** from anywhere using:
@@ -120,7 +122,26 @@ After running one of these commands, you'll be prompted to enter your text promp
 
 <br/>
 
-## 5. Uninstalling **GGUFy**
+## 5. Cache Management
+
+**GGUFy** caches downloaded models in the `~/.cache/ggufy` directory. This helps to avoid re-downloading models you've used before. 
+
+To manage the cache:
+
+1. To clear the cache and free up space, you can manually delete the files in the `~/.cache/ggufy` directory.
+2. If you want to force a re-download of a model, delete its corresponding file from the cache directory.
+
+You can view the list of cached models using the `list` command. 
+This will show you the repository names and file names of all cached models.
+
+To list cached models on **GGUFy**, run:
+```bash
+ggufy list
+```
+
+<br/>
+
+## 6. Uninstalling **GGUFy**
 
 To uninstall **GGUFy** and remove all related files, run:
 ```bash
@@ -134,17 +155,6 @@ This command will:
 - Delete the **GGUFy** script itself
 
 After running this command, you may need to manually remove the `ggufy` command from your PATH if you added it during installation.
-
-<br/>
-
-## 6. Cache Management
-
-**GGUFy** caches downloaded models in the `~/.cache/ggufy` directory. This helps to avoid re-downloading models you've used before. 
-
-To manage the cache:
-
-1. To clear the cache and free up space, you can manually delete the files in the `~/.cache/ggufy` directory.
-2. If you want to force a re-download of a model, delete its corresponding file from the cache directory.
 
 <br/>
 
