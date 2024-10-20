@@ -83,6 +83,7 @@ ggufy run -h
 
 - `login`: Save your Hugging Face API token
 - `run`: Run a GGUF model
+- `list`: List all cached models
 - `remove`: Uninstall **GGUFy** and remove all related files
 
 ### 4. 2. Required Arguments for 'run' command
