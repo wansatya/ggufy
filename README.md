@@ -101,6 +101,8 @@ ggufy run -h
 - `-t`, `--max-tokens`: Maximum number of tokens to generate (default: 200)
 - `--cpu`: Force CPU usage even if GPU is available
 - `--stream`: Enable streaming output for real-time text generation
+- `--gpu-layers`: Number of layers to offload to GPU (default: all)
+- `--force-download`: Force re-download of the model even if it exists in cache
 
 ### 4. 4. Examples
 
@@ -173,7 +175,15 @@ By using the `--stream` flag, you can enable real-time streaming of the generate
 
 <br/>
 
-## 9. Troubleshooting
+## 9. Checksum Verification and Force Download
+
+GGUFy includes checksum verification to ensure the integrity of downloaded model files. After each download, the script verifies the file's hash against the expected hash (if provided by the server).
+
+If you encounter issues with a model file, such as corruption or incomplete downloads, you can use the `--force-download` flag to re-download the entire file:
+
+<br/>
+
+## 10. Troubleshooting
 
 1. If `ggufy` command is not found, make sure you've restarted your terminal or sourced your shell configuration file after running the setup script.
 
@@ -195,13 +205,13 @@ By using the `--stream` flag, you can enable real-time streaming of the generate
 
 <br/>
 
-## 10. Contributing
+## 11. Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
 <br/>
 
-## 11. License
+## 12. License
 
 MIT License
 
