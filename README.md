@@ -4,7 +4,16 @@
 
 <br/>
 
-## 1. How it works
+## 1. Prerequisites
+
+- Bash shell (Linux or macOS terminal, or Git Bash for Windows)
+- Python 3.7 or later
+- curl (for downloading the script)
+- Hugging Face account and API token
+
+<br/>
+
+## 2. How it works
 
 1. The setup script installs the latest release of **GGUFy** in a dedicated directory with its own virtual environment.
 
@@ -17,14 +26,20 @@
    - You can input multiple prompts interactively, and the script will generate text based on each prompt.
    - Cached models are kept for future use, reducing download times for subsequent runs.
 
-<br/>
+3. Here are some models you can try:
 
-## 2. Prerequisites
-
-- Bash shell (Linux or macOS terminal, or Git Bash for Windows)
-- Python 3.7 or later
-- curl (for downloading the script)
-- Hugging Face account and API token
+   ```bash
+   ggufy run hf.co/bartowski/Llama-3.2-1B-Instruct-GGUF
+   ```
+   ```bash
+   ggufy run hf.co/mlabonne/Meta-Llama-3.1-8B-Instruct-abliterated-GGUF
+   ```
+   ```bash
+   ggufy run hf.co/arcee-ai/SuperNova-Medius-GGUF
+   ```
+   ```bash
+   ggufy run hf.co/bartowski/Humanish-LLama3-8B-Instruct-GGUF
+   ```
 
 <br/>
 
